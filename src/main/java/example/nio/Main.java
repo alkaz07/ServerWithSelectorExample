@@ -7,6 +7,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -36,15 +39,23 @@ public class Main {
                         System.out.println("Добавлено соединение "+k);
                     }
                     if(k.isReadable()){
+
                         SocketChannel client = (SocketChannel) k.channel();
                         ByteBuffer requestBuf = ByteBuffer.allocate(100);
                         int r = client.read(requestBuf);
+                        System.out.println("получено байт: "+r);
                         if(r == -1) client.close();
                         else{
                             byte[] result = new byte[r];
+                            requestBuf.get(0, result);
                             System.out.println(" Получено: " + new String(result));
+                            System.out.println("Arrays.toString(result) = " + Arrays.toString(result));
+                            System.out.println(Thread.currentThread().getName());
+                            String response = "Привет "+client.socket().getLocalAddress();
+                            client.write(ByteBuffer.wrap(response.getBytes()));
                         }
                     }
+                    keyIterator.remove();
                 }
             }
         }
